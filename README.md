@@ -3,6 +3,9 @@
 #### Spring Framework
 ##### Foi utilizado Spring e suas ferramentas para facilitar o desenvolvimento, a comunicação com banco de dados e o desenvolvimento
 
+#### Swagger 
+##### usei para documentar a aplicação 
+
 #### Banco de dados 
 
 ##### Foi usado o H2  para poder baixar e rodar em qualquer maquina a aplicação sem precisar  instalar banco na maquina ou subir algun container de banco
