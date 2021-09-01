@@ -2,14 +2,18 @@ package avaliacao.forttiori.service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import avaliacao.forttiori.client.DataPoaClient;
+import avaliacao.forttiori.exception.BusBadRequestException;
 import avaliacao.forttiori.model.Itinerary;
 import avaliacao.forttiori.repository.ItineraryRepository;
 import avaliacao.forttiori.request.dto.ItineraryRequestDTO;
+import avaliacao.forttiori.request.dto.ItinerarySaveRequestDTO;
 import avaliacao.forttiori.response.client.dto.RecordsItineraryResponseDTO;
+import avaliacao.forttiori.response.dto.ItineraryResponseDTO;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
@@ -38,7 +42,7 @@ public class ItineraryService {
 
 	}
 
-	public List<RecordsItineraryResponseDTO> getItineraryBus(ItineraryRequestDTO dto) {
+	public List<ItineraryResponseDTO> getItineraryBus(ItineraryRequestDTO dto) {
 
 		log.info("Realizando uma Consulta de itinerarios da Api datapoa ");
 		List<RecordsItineraryResponseDTO> dataRecords = client.getItineraryDataPoa(dto.getEntryType(), dto.getLimit(), dto.getOffiset());
@@ -46,7 +50,7 @@ public class ItineraryService {
 		log.info("Realizando salvamento no banco de dados  dos dados buscado da APi datapoa ");
 		SavingBusItineraryList(dataRecords);
 
-		return dataRecords;
+		return dataRecords.stream().map(x -> new ItineraryResponseDTO(x)).collect(Collectors.toList());
 	}
 
 	private void SavingBusItineraryList(List<RecordsItineraryResponseDTO> dataRecords) {
@@ -63,6 +67,41 @@ public class ItineraryService {
 		Optional<Itinerary> itinerary = repository.findById(id);
 
 		return itinerary;
+	}
+
+	public ItineraryResponseDTO saveItiterary(ItinerarySaveRequestDTO itinerarySaveRequestDTO) {
+		Itinerary itinerary = new Itinerary();
+
+		copyDtoToEntity(itinerarySaveRequestDTO, itinerary);
+
+		Itinerary entity = checkItinerary(itinerary.getLine());
+		if (entity == null) {
+			itinerary = repository.save(itinerary);
+		} else {
+
+			throw new BusBadRequestException("Ja existe um itinerario cadastrado com esse parametros");
+		}
+
+		return new ItineraryResponseDTO(itinerary);
+	}
+
+	@Transactional(readOnly = true)
+	public Itinerary checkItinerary(String line) {
+		log.info("Buscando o itinerario do onibus pela linha {}" + line);
+		Itinerary itinerary = repository.findByline(line);
+
+		return itinerary;
+	}
+
+	private void copyDtoToEntity(ItinerarySaveRequestDTO dto, Itinerary entity) {
+
+		entity.setLine(dto.getLine());
+		entity.setSense(dto.getSense());
+		entity.setTableType(dto.getTableType());
+		entity.setDefectiveAdapter(dto.getDefectiveAdapter());
+		entity.setDayType(dto.getDayType());
+		entity.setDay(dto.getDay());
+
 	}
 
 }

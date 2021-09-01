@@ -7,4 +7,6 @@ import avaliacao.forttiori.model.Itinerary;
 @Repository
 public interface ItineraryRepository extends JpaRepository<Itinerary, Long> {
 
+	Itinerary findByline(String line);
+
 }
