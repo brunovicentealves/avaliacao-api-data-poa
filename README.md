@@ -11,6 +11,13 @@
 ##### Foi usado o H2  para poder baixar e rodar em qualquer maquina a aplicação sem precisar  instalar banco na maquina ou subir algun container de banco.
 
 
+#### Spring Security
+##### Usei autenticação basic para validar quem pode acessar o endpoints
+##### Usuario : PoaTransporte
+##### Senha : 123456
+
+
+
 
 
 
